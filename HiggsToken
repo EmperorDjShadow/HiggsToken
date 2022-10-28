@@ -1,0 +1,28 @@
+pragma solidity 0.7.4;
+
+//Create smart contract
+contract HiggsToken{
+    address public minter; //Keep track of who is the minter/allowed to mint new tokens
+    mapping (address => uint) public balances; //Keep track of every addresses balance that has participated with our smart contract
+    event Sent(address from, address to, uint amount); //People can subscribe and react to changes to the state of our contract (Whenever anyone sends a transaction)
+
+
+    constructor(){ //Executed when contract is initially deployed
+       minter = msg.sender; //Person who created this contract (in charge of minting tokens)
+    }
+
+    //Functions can be executed by anyone on the blockchain as long as it has public keyword
+    //uint = Positive whole number
+    function mint(address receiver, uint amount) public{ //When minting new tokens, specify address of receiver who will receive tokens, and amount we will mint
+       require(msg.sender == minter); 
+        balances[receiver] += amount;//Balance of receiver who should receive limited tokens
+    }
+
+    //Function to send tokens from one address to another
+    function send(address receiver, uint amount) public{
+        require(amount <= balances[msg.sender], "Insufficient Balance"); //Checks to make sure person making transaction has sufficient balance
+        balances[msg.sender] -= amount; //Decrease sender's wallet
+        balances[receiver] += amount; //Increase receiver's wallet
+        emit Sent(msg.sender, receiver, amount); 
+    }
+}
